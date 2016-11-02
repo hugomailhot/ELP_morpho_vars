@@ -17,14 +17,16 @@ import csv
 import nltk
 
 PROJECT_PATH = '/home/hugo/Projects/elp_freq_morpho/'
-SEGM_DB_PATH = os.path.join(PROJECT_PATH, 'input/ELP_segmentations.csv')
+SEGM_DB_PATH = os.path.join(PROJECT_PATH, 'input/ELP_segmentations_3.csv')
 MAIN_DB_PATH = os.path.join(PROJECT_PATH, 'input/ELP-2016-04-07.csv')
-VARS_SAVE_PATH = os.path.join(PROJECT_PATH, 'output/ELP morphological variables 4.csv')
-HAPAX_FREQ_THRESHOLD = 0.02
+VARS_SAVE_PATH = os.path.join(PROJECT_PATH, 'output/ELP_morphological_variables.csv')
+HAPAX_SBTL_FREQ_THRESHOLD = 0.02
+HAPAX_HAL_FREQ_THRESHOLD = 2
 DB_WORD_COL = 0
-DB_FREQ_COL = 1
-DB_POS_COL = 4
+DB_SBTL_FREQ_COL = 1
+DB_HAL_FREQ_COL = 2
 DB_SEGM_COL = 3
+DB_POS_COL = 4
 
 
 def apply_morpho_vars_to_lex_db(db, morpho_vars):
@@ -43,10 +45,15 @@ def apply_morpho_vars_to_lex_db(db, morpho_vars):
             res[prs] = []
         morphemes = get_morphemes(segm)
         for m in morphemes:
-            relative_fam_freq = get_relative_fam_freq(m, db, segm, word_freq)
-            m_vars = [morpho_vars[m]['freq'], morpho_vars[m]['family_size'],
-                      morpho_vars[m]['p'], morpho_vars[m]['p*'],
-                      relative_fam_freq]
+            m_vars = [morpho_vars[m]['family_size'],
+                      morpho_vars[m]['sbtl_freq'],
+                      morpho_vars[m]['sbtl_rel_fam_freq'],
+                      morpho_vars[m]['sbtl_p'],
+                      morpho_vars[m]['sbtl_p*'],
+                      morpho_vars[m]['hal_freq'],
+                      morpho_vars[m]['hal_rel_fam_freq'],
+                      morpho_vars[m]['hal_p'],
+                      morpho_vars[m]['hal_p*']]
             temp.extend(m_vars)
         res[prs].append(temp)
 
@@ -67,23 +74,28 @@ def compute_morphological_variables(db, hapax_set):
     counted = set()
 
     for row in db:
-        morphemes = get_morphemes(row[DB_SEGM_COL])
-        pos_list = parse_pos_info(row[DB_POS_COL])  # Possibly more than one POS
-        if not pos_list:
-            continue
+        segm = row[DB_SEGM_COL]
+        morphemes = get_morphemes(segm)
         for m in [x for x in morphemes if x not in counted]:
             freq = total_morpheme_freq(m, db)
             family = get_family(m, db)
-            m_freq_in_hapax = total_morpheme_freq(m, hapax_set)
-            morpho_vars[m] = {'freq': freq}
+            relative_fam_freq = get_relative_fam_freq(m, db, segm, freq)
+            morpho_vars[m] = {'sbtl_freq': freq['sbtl'], 'hal_freq': freq['hal']}
             morpho_vars[m]['family_size'] = len(family)
-            if m_freq_in_hapax == 0:
-                morpho_vars[m]['p'] = 0
-                morpho_vars[m]['p*'] = 0
+            morpho_vars[m]['sbtl_rel_fam_freq'] = relative_fam_freq['sbtl']
+            morpho_vars[m]['hal_rel_fam_freq'] = relative_fam_freq['hal']
+            hapax_freq = total_morpheme_freq(m, hapax_set)
+            if hapax_freq == 0:
+                morpho_vars[m]['sbtl_p'] = 0
+                morpho_vars[m]['sbtl_p*'] = 0
+                morpho_vars[m]['hal_p'] = 0
+                morpho_vars[m]['hal_p*'] = 0
             else:
                 # print(m, row[0], m_freq_in_hapax, freq)
-                morpho_vars[m]['p'] = m_freq_in_hapax / freq
-                morpho_vars[m]['p*'] = m_freq_in_hapax / len(hapax_set)
+                morpho_vars[m]['sbtl_p'] = hapax_freq['sbtl'] / freq['sbtl']
+                morpho_vars[m]['sbtl_p*'] = hapax_freq['sbtl'] / len(hapax_set)
+                morpho_vars[m]['hal_p'] = hapax_freq['hal'] / freq['hal']
+                morpho_vars[m]['hal_p*'] = hapax_freq['hal'] / len(hapax_set)
             counted.add(m)
 
     return morpho_vars
@@ -95,47 +107,67 @@ def generate_headers(prs):
     structure (column names).
     """
     p, r, s = int(prs[0]), int(prs[1]), int(prs[2])
-    headers = ['Word', 'SUBTLWF', 'LgSUBTLWF', 'MorphSp', 'POS', '']
+    headers = ['Word', 'SUBTLWF', 'Freq_HAL', 'MorphSp', 'POS', '']
     for i in range(1, p+1):
-        headers.extend(['PREF%d_SumTokFreq' % i, 'PREF%d_FamSize' % i,
-                        'PREF%d_P' % i, 'PREF%d_P*' % i,
-                        'PREF%d_%%FamMoreFreq' % i])
+        headers.extend(['PREF%d_FamSize' % i, 
+
+                        'PREF%d_Freq_SBTL' % i, 'PREF%d_%%FamMoreFreq_SBTL' % i,
+                        'PREF%d_P_SBTL' % i, 'PREF%d_P*_SBTL' % i,
+
+                        'PREF%d_Freq_HAL' % i, 'PREF%d_%%FamMoreFreq_HAL' % i,
+                        'PREF%d_P_HAL' % i, 'PREF%d_P*' % i
+                        ])
     for i in range(1, r+1):
-        headers.extend(['ROOT%d_SumTokFreq' % i, 'ROOT%d_FamSize' % i,
-                        'ROOT%d_P' % i, 'ROOT%d_P*' % i,
-                        'ROOT%d_%%FamMoreFreq' % i])
+        headers.extend(['ROOT%d_FamSize' % i, 
+
+                        'ROOT%d_Freq_SBTL' % i, 'ROOT%d_%%FamMoreFreq_SBTL' % i,
+                        'ROOT%d_P_SBTL' % i, 'ROOT%d_P*_SBTL' % i,
+
+                        'ROOT%d_Freq_HAL' % i, 'ROOT%d_%%FamMoreFreq_HAL' % i,
+                        'ROOT%d_P_HAL' % i, 'ROOT%d_P*' % i
+                        ])
     for i in range(1, s+1):
-        headers.extend(['SUFF%d_SumTokFreq' % i, 'SUFF%d_FamSize' % i,
-                        'SUFF%d_P' % i, 'SUFF%d_P*' % i,
-                        'SUFF%d_%%FamMoreFreq' % i])
+        headers.extend(['SUFF%d_FamSize' % i, 
+
+                        'SUFF%d_Freq_SBTL' % i, 'SUFF%d_%%FamMoreFreq_SBTL' % i,
+                        'SUFF%d_P_SBTL' % i, 'SUFF%d_P*_SBTL' % i,
+
+                        'SUFF%d_Freq_HAL' % i, 'SUFF%d_%%FamMoreFreq_HAL' % i,
+                        'SUFF%d_P_HAL' % i, 'SUFF%d_P*' % i
+                       ])
     return headers
 
 
 def get_family(morpheme, db):
     """
-    Returns a dict {WORD: FREQUENCY} of all the words in database that contain
-    the morpheme.
+    Returns a dict {WORD: {'hal': HAL_FREQUENCY, 'sbtl': SBTL:FREQUENCY}} of all the words
+    in database that contain the morpheme.
     """
     family = {}
     for row in db:
         if morpheme in row[DB_SEGM_COL]:
-            if row[DB_FREQ_COL] != 'NULL':
-                family[row[DB_SEGM_COL]] = row[DB_FREQ_COL]
+            if row[DB_SBTL_FREQ_COL] != 'NULL':
+                family[row[DB_SEGM_COL]] = {'sbtl': row[DB_SBTL_FREQ_COL]}
             else:
-                family[row[DB_SEGM_COL]] = 0
+                family[row[DB_SEGM_COL]] = {'sbtl': 0}
+            family[row[DB_SEGM_COL]]['hal'] = row[DB_HAL_FREQ_COL]
 
     return family
 
 
 def get_hapax_set(db):
     """
-    Returns the set of words in database that have frequency equal or lower to
-    HAPAX_FREQ_THRESHOLD
+    Returns the set of words in database that have either:
+    a) subtitle word frequency equal or lower to HAPAX_SBTL_FREQ_THRESHOLD 
+        OR
+    b) HAL frequency equal or lower to HAPAX_HAL_FREQ_THRESHOLD 
     """
     hapax = []
     for row in db:
-        if row[DB_FREQ_COL] != 'NULL':
-            if row[DB_FREQ_COL] <= HAPAX_FREQ_THRESHOLD:
+        if row[DB_HAL_FREQ_COL] < HAPAX_HAL_FREQ_THRESHOLD:
+            hapax.append(row)
+        elif row[DB_SBTL_FREQ_COL] != 'NULL':
+            if row[DB_SBTL_FREQ_COL] <= HAPAX_FREQ_THRESHOLD:
                 hapax.append(row)
     return hapax
 
@@ -146,7 +178,7 @@ def get_morphemes(segm):
     """
     if segm == 'NULL':
         raise Exception("NULL segmentation OMG!")
-    morphemes = re.findall(r'[<>^][^><^]+?[<>^]', segm)
+    morphemes = re.findall(r'[<>{][^><}]+?[<>}]', segm)
     # rest = segm
     # for m in morphemes:
     #     rest = rest.replace(m, '')
@@ -166,22 +198,23 @@ def get_PRS_signature(segm):
     # of prefixes, # of roots, and # of suffixes, respectively.
     """
     n_pref = segm.count('<') / 2
-    n_root = segm.count('^') / 2
+    n_root = segm.count('{')
     n_suff = segm.count('>') / 2
     return (n_pref, n_root, n_suff)
 
 
-def get_relative_fam_freq(morpheme, db, segm, word_freq):
+def get_relative_fam_freq(morpheme, db, segm, word_freq, family):
     """
     Given a word and one of its morphemes, return the percentage of words in db
     that contain the same morpheme and are more frequent.
     """
-    family = get_family(morpheme, db)
     if len(family) == 1:
-        return 0
+        return {'sbtl': 0, 'hal': 0}
     family.pop(segm, None)
-    more_frequent_in_fam = sum([1 for x in family.values() if x > word_freq])
-    return (more_frequent_in_fam / len(family)) * 100
+    more_frequent_in_fam_sbtl = sum([1 for x in family.values() if x['sbtl'] > word_freq['sbtl']])
+    more_frequent_in_fam_hal = sum([1 for x in family.values() if x['hal'] > word_freq['hal']])
+    return {'sbtl': (more_frequent_in_fam_sbtl / len(family)) * 100,
+            'hal': (more_frequent_in_fam_hal / len(family)) * 100}
 
 
 def merge_new_data_with_database(prs_data, main_db):
@@ -196,50 +229,15 @@ def merge_new_data_with_database(prs_data, main_db):
     return prs_data
 
 
-def p_measures(morpheme, morpheme_freq, hapax_set):
-    """
-    Computes the P and P* measures given a morpheme a corpus and the set of
-    hapax legomena in the corpus. Returns a tuple containing (P, P*).
-
-    hapax_set is the set of all words with smallest frequency in ELP, that is,
-    with SUBTLWF = 0.02.
-
-    For details, see:
-    http://www.sfs.uni-tuebingen.de/~hbaayen/publications/BaayenLCP1994.pdf
-    """
-    # In case the frequency was NULL in the database
-    if morpheme_freq == 0:
-        return (0, 0)
-
-    morph_type_count_in_hapax_set = 0
-
-    p = morph_type_count_in_hapax_set / morpheme_freq
-    p_star = morph_type_count_in_hapax_set / len(hapax_set)
-
-    return (p, p_star)
-
-
-def parse_pos_info(pos_info):
-    """
-    Parses a string that may contain multiple POS codes separated by pipelines.
-    Some parsed POS are not acceptable and are discarded
-    """
-    return [x for x in re.split(r'\|', pos_info) if x not in {'encl', 'minor'}]
-
-
 def preprocess_db(db):
     """
-    Prepare csb data for processing by the program.
+    Prepare csv data for processing by the program.
     """
     for row in db:
         if row[DB_FREQ_COL] != 'NULL':
             row[DB_FREQ_COL] = float(row[DB_FREQ_COL])
         else:
             row[DB_FREQ_COL] = 0
-        row[DB_SEGM_COL] = re.sub(r'--?', '', row[DB_SEGM_COL])
-        row[DB_SEGM_COL] = re.sub(r'{([^<>]+?)}', r'^\1^', row[DB_SEGM_COL])
-        row[DB_SEGM_COL] = re.sub(r'(^|<|{)([^^{}<>]+?)(}|$|>)', r'\1^\2^\3',
-                                  row[DB_SEGM_COL])
     return db
 
 
@@ -248,13 +246,16 @@ def total_morpheme_freq(morpheme, db):
     Sums the frequencies of words containing the morpheme in the database.
     Returns an int.
     """
-    total_freq = 0
+    total_freq_sbtl = 0
+    total_freq_hal = 0
     for row in db:
         if morpheme in row[DB_SEGM_COL]:
-            count = 0 if row[DB_FREQ_COL] == 'NULL' else row[DB_FREQ_COL]
-            total_freq += count
+            count = 0 if row[DB_SBTL_FREQ_COL] == 'NULL' else row[DB_SBTL_FREQ_COL]
+            total_freq_sbtl += count
+            count = 0 if row[DB_HAL_FREQ_COL] == 'NULL' else row[DB_HAL_FREQ_COL]
+            total_freq_hal += count
 
-    return total_freq
+    return {'sbtl': total_freq_sbtl, 'hal': total_freq_hal}
 
 
 def save_morpho_vars_to_file(morpho_vars, filepath):
