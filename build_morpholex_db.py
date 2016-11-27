@@ -27,7 +27,6 @@ The output database must contain the following data for each entry:
   * P*
 """
 
-from __future__ import division
 from collections import OrderedDict
 from pprint import pprint
 import copy
@@ -92,7 +91,7 @@ def compute_morphological_variables(db, hapax_set):
     - summed token frequency
     - p-measure
     - p*-measure
-    - % of family more frequent
+    - % of family more frequent (PFMF)
     """
     morpho_vars = {}
     counted = set()
@@ -103,7 +102,6 @@ def compute_morphological_variables(db, hapax_set):
         morphemes = get_morphemes(segm)
         for m in [x for x in morphemes if x not in counted]:
             counted.add(m)
-
             freq = total_morpheme_freq(m, db)
             family = get_family(m, db)
             morpho_vars[m] = {'sbtl_freq': freq['sbtl'], 'hal_freq': freq['hal']}
@@ -201,7 +199,7 @@ def get_hapax_set(db):
         if row[DB_HAL_FREQ_COL] <= HAPAX_HAL_FREQ_THRESHOLD:
             hapax.append(row)
         elif row[DB_SBTL_FREQ_COL] <= HAPAX_SBTL_FREQ_THRESHOLD:
-                hapax.append(row)
+            hapax.append(row)
     return hapax
 
 
@@ -210,8 +208,8 @@ def get_morphemes(segm):
     Parses the ELP morpheme segmentation string and returns a list of morphemes.
     """
     if segm == 'NULL':
-        raise Exception("NULL segmentation OMG!")
-    return re.findall(r'[<>{][^><}]+?[<>}]', segm)
+        raise Exception("NULL segmentation!")
+    return re.findall(r'[<>(][^><)]+?[<>)]', segm)
 
 
 def get_PRS_signature(segm):
@@ -220,7 +218,7 @@ def get_PRS_signature(segm):
     # of prefixes, # of roots, and # of suffixes, respectively.
     """
     n_pref = int(segm.count('<') / 2)
-    n_root = segm.count('{')
+    n_root = segm.count('(')
     n_suff = int(segm.count('>') / 2)
     return (n_pref, n_root, n_suff)
 
@@ -258,10 +256,13 @@ def preprocess_db(db):
     """
     Prepare csv data for processing by the program.
     """
-    # 1. Keep only the subset of the db for which we have to following data:
-    #    - Freq_HAL
-    #    - MorphoLexSegm
-    for row in db:
+    # 1. Keep only the subset of the db for which we have a MorphoLexSegm value
+    #    Those items that have a zero or NULL frequency everywhere or that have a NULL
+    #    POS are a subset of the items without a segmentation.
+    valid_db_subset = [x for x in db if x[DB_SEGM_COL] != 'NULL']
+
+    # 2. Ensure that relevant numeric values are not expressed as strings
+    for row in valid_db_subset:
         # Some values are NULL in the SBTLWF column
         if row[DB_SBTL_FREQ_COL] != 'NULL':
             row[DB_SBTL_FREQ_COL] = float(row[DB_SBTL_FREQ_COL])
@@ -273,7 +274,7 @@ def preprocess_db(db):
         except:
             print(row)
             raise
-    return db
+    return valid_db_subset
 
 
 def total_morpheme_freq(morpheme, db):
@@ -314,15 +315,16 @@ if __name__ == '__main__':
     by PRS signature and build one database per PRS signature where each
     lexical item is associated with its parts' morphological variables.
     """
-    with open(SEGM_DB_PATH) as database:
-        segm_db = [x for x in list(csv.reader(database))[1:] if x]  # skip headers
+    # Load lexical database
+    with open(DB_PATH) as database:
+        db = [x for x in list(csv.reader(database))[2:] if x]  # skip headers (2 rows)
 
     print('preprocessing db')
-    segm_db = preprocess_db(segm_db)
+    db = preprocess_db(db)
     print('getting hapax set')
-    hapax_set = get_hapax_set(segm_db)
+    hapax_set = get_hapax_set(db)
     print('computing morphological variables')
-    morpho_vars = compute_morphological_variables(segm_db, hapax_set)
+    morpho_vars = compute_morphological_variables(db, hapax_set)
     print('applying morphological variables to database')
     new_data_by_prs = apply_morpho_vars_to_lex_db(segm_db, morpho_vars)
 
