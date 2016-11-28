@@ -66,8 +66,8 @@ def apply_morpho_vars_to_lex_db(db, morpho_vars):
         wordlen = len(row[DB_WORD_COL])
         n_morphemes = len(morphemes)
         prs_string = ','.join([str(x) for x in prs])
-        temp = (row[DB_ITEMID_COL] + row[DB_WORD_COL] + row[DB_POS_COL] + 
-                [wordlen, n_morphemes, prs_string, segm])
+        temp = [row[DB_ITEMID_COL], row[DB_WORD_COL], row[DB_POS_COL], wordlen, 
+                n_morphemes, prs_string, segm]
         for m in morphemes:
             freq = morpho_vars[m]['hal_freq']
             rel_fam_freq = get_relative_fam_freq(m, db, segm, freq,
@@ -114,8 +114,8 @@ def compute_morphological_variables(db, hapax_set):
                 morpho_vars[m]['hal_p'] = 0
                 morpho_vars[m]['hal_p*'] = 0
             else:
-                morpho_vars[m]['hal_p'] = hapax_freq['hal'] / freq['hal']
-                morpho_vars[m]['hal_p*'] = hapax_freq['hal'] / len(hapax_set)
+                morpho_vars[m]['hal_p'] = hapax_freq / freq
+                morpho_vars[m]['hal_p*'] = hapax_freq / len(hapax_set)
 
     print('\n')
     return morpho_vars
@@ -127,7 +127,7 @@ def generate_headers(prs):
     structure (column names).
     """
     p, r, s = int(prs[0]), int(prs[1]), int(prs[2])
-    headers = ['NewMorphSp']
+    headers = []
     for i in range(1, p+1):
         headers.extend(['PREF%d_FamSize' % i, 
                         'PREF%d_Freq_HAL' % i, 'PREF%d_%%FamMoreFreq_HAL' % i,
@@ -211,7 +211,7 @@ def get_relative_fam_freq(morpheme, db, segm, word_freq, family):
     that contain the same morpheme and are more frequent.
     """
     if len(family) == 1:
-        return {'sbtl': 0, 'hal': 0}
+        return 0
     family.pop(segm, None)
     more_frequent_in_fam_hal = sum([1 for x in family.values()
                                     if x['hal_freq'] > word_freq])
@@ -328,14 +328,15 @@ if __name__ == '__main__':
     # merged_data = merge_new_data_with_database(new_data_by_prs, main_db)
 
     # create output directory if it doesn't exist already
-    os.makedirs('output', exist_ok=True)   
+    os.makedirs('output', exist_ok=True)
+    headers = ['ELP_ItemID', 'Word', 'POS', 'Length', 'Nmorph', 'PRS_signature', 
+               'MorphoLexSegm']
     for prs, data in new_data_by_prs.items():
         prs_str = re.sub(r'[,()]', '', str(prs))
         savepath = os.path.join(PROJECT_PATH, 'output/%s.csv' % prs_str)
         with open(savepath, 'w') as f:
             csvwriter = csv.writer(f)
-            csvwriter.writerow(headers1)
-            csvwriter.writerow(headers2 + generate_headers(prs))
+            csvwriter.writerow(headers + generate_headers(prs))
             csvwriter.writerows(data)
 
 
