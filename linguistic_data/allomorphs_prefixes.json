@@ -1,0 +1,146 @@
+{
+  "a": [
+    "a",
+    "an",
+    "ad",
+    "as",
+    "ac"
+  ],
+  "ante": [
+    "ante"
+  ],
+  "anti": [
+    "anti",
+    "anto"
+  ],
+  "arch": [
+    "arch",
+    "archi"
+  ],
+  "bi": [
+    "bi"
+  ],
+  "centi": [
+    "centi"
+  ],
+  "co": [
+    "co",
+    "col",
+    "com",
+    "con"
+  ],
+  "de": [
+    "de",
+    "des"
+  ],
+  "deca": [
+    "deca"
+  ],
+  "di": [
+    "di"
+  ],
+  "en": [
+    "en",
+    "em"
+  ],
+  "hect": [
+    "hect",
+    "hecto"
+  ],
+  "hepta": [
+    "hepta"
+  ],
+  "hexa": [
+    "hexa"
+  ],
+  "in": [
+    "i",
+    "im",
+    "in",
+    "ig",
+    "il"
+  ],
+  "kilo": [
+    "kilo"
+  ],
+  "max": [
+    "max",
+    "maxi"
+  ],
+  "medio": [
+    "medi",
+    "medio"
+  ],
+  "mega": [
+    "mega"
+  ],
+  "milli": [
+    "milli"
+  ],
+  "min": [
+    "min",
+    "mini"
+  ],
+  "mono": [
+    "mono"
+  ],
+  "multi": [
+    "multi"
+  ],
+  "nona": [
+    "nona"
+  ],
+  "octo": [
+    "octo"
+  ],
+  "penta": [
+    "penta"
+  ],
+  "post": [
+    "post"
+  ],
+  "pre": [
+    "pre"
+  ],
+  "quad": [
+    "quad",
+    "quadri",
+    "quadr",
+    "quadru"
+  ],
+  "quasi": [
+    "quasi"
+  ],
+  "quint": [
+    "quint",
+    "quinti"
+  ],
+  "septa": [
+    "septa",
+    "sept",
+    "septua"
+  ],
+  "sexa": [
+    "sexa"
+  ],
+  "tetra": [
+    "tetra",
+    "tetr",
+    "tetro"
+  ],
+  "trans": [
+    "trans",
+    "tran",
+    "tra"
+  ],
+  "tri": [
+    "tri"
+  ],
+  "ultra": [
+    "ultra"
+  ],
+  "uni": [
+    "un",
+    "uni"
+  ]
+}
