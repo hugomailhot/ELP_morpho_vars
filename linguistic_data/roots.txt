@@ -1588,6 +1588,7 @@ sperse
 sphen
 spheno
 spir
+phenomen
 spire
 spondylus
 spondyluso
@@ -1719,6 +1720,8 @@ thermo
 thermos
 thero
 thes
+thet
+hindr
 thesis
 thetic
 thir

@@ -84,17 +84,15 @@
     "arbiter",
     "arbitr"
   ],
-  "arch":
-  ["arch", "archi"],
+  "arch": [
+    "arch",
+    "archi"
+  ],
   "archaeo": [
     "archa",
     "archaeo",
     "archeo"
   ],
-  "three":
-  ["three", "thir"],
-  "five":
-  ["five", "fif"],
   "areo": [
     "aero",
     "aer"
@@ -398,7 +396,6 @@
   "derm": [
     "derm",
     "derma",
-    "derma",
     "dermat",
     "dermato",
     "dermo"
@@ -512,6 +509,10 @@
   "firm": [
     "firm",
     "ffirm"
+  ],
+  "five": [
+    "five",
+    "fif"
   ],
   "flor": [
     "flor",
@@ -700,6 +701,10 @@
     "hier",
     "hiero"
   ],
+  "hinder": [
+    "hinder",
+    "hindr"
+  ],
   "holy": [
     "holy",
     "holi"
@@ -715,8 +720,6 @@
     "hume",
     "hum"
   ],
-  "hinder":
-  ["hinder","hindr"],
   "hydr": [
     "hydr",
     "hydro"
@@ -1277,13 +1280,9 @@
   "phys": [
     "phys",
     "physi",
-    "physio"
-  ],
-  "physic": [
-    "physi",
-    "physico",
     "physio",
-    "physic"
+    "physic",
+    "physico"
   ],
   "piano": [
     "piano",
@@ -1505,24 +1504,15 @@
     "rupt",
     "rrupt"
   ],
-  "sacr": [
+  "sacro": [
     "sacr",
     "sacra",
     "sacro",
     "sacri"
   ],
-  "sacro": [
-    "sacr",
-    "sacro",
-    "sacer"
-  ],
   "sagac": [
     "sagac",
     "sagaci"
-  ],
-  "saint": [
-    "saint",
-    "sanct"
   ],
   "saliva": [
     "saliva",
@@ -1658,11 +1648,6 @@
     "spain",
     "span"
   ],
-  "specter": [
-    "spectr",
-    "specter",
-    "spectro"
-  ],
   "spectr": [
     "spectr",
     "spectro",
@@ -1743,10 +1728,6 @@
     "suck",
     "suct"
   ],
-  "sulf": [
-    "sulf",
-    "sulph"
-  ],
   "sulph": [
     "sulf",
     "sulph"
@@ -1826,6 +1807,10 @@
     "therm",
     "thermo",
     "thermos"
+  ],
+  "three": [
+    "three",
+    "thir"
   ],
   "thrombo": [
     "thromb",
