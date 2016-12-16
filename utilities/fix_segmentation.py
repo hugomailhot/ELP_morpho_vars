@@ -51,14 +51,13 @@ import os
 
 
 project_fp = '/home/hugo/Projects/ELP_morpho_vars'
-elp_fp = os.path.join(project_fp, 'input/ELP-2016-11-26.csv')
-output_fp = os.path.join(project_fp, 'input/ELP-2016-12-10.csv')
-e_roots_fp = os.path.join(project_fp, 'linguistic_data/english_roots.txt')
-c_roots_fp = os.path.join(project_fp, 'linguistic_data/classical_roots.txt')
-e_non_roots_fp = os.path.join(project_fp, 'linguistic_data/english_non_roots.txt')
-c_non_roots_fp = os.path.join(project_fp, 'linguistic_data/classical_non_roots.txt')
-non_roots_fp = os.path.join(project_fp, 'linguistic_data/non_roots.txt')
+elp_fp = os.path.join(project_fp, 'input/ELP-2016-12-10.csv')
+output_fp = os.path.join(project_fp, 'input/ELP-2016-12-14.csv')
 roots_fp = os.path.join(project_fp, 'linguistic_data/roots.txt')
+non_roots_fp = os.path.join(project_fp, 'linguistic_data/non_roots.txt')
+allo_prefs_fp = os.path.join(project_fp, 'linguistic_data/rev_allomorphes_prefixes.json')
+allo_roots_fp = os.path.join(project_fp, 'linguistic_data/rev_allomorphes_roots.json')
+allo_suffs_fp = os.path.join(project_fp, 'linguistic_data/rev_allomorphes_suffixes.json')
 
 def rreplace(s, old, new, count):
     """ Replaces only the rightmost occurrence of old in string s, count times."""
@@ -74,45 +73,19 @@ with open(elp_fp) as f:
 # 46 is MorphSp
 # 47 is MorphSp_revised
 # 48 is MorphoLexSegm
+# 49 is MorphoLexSegmMerged
 # Copy MorphSp_revised (segmentation) column in new list, we work on that list
+# allo_segm will hold the segmentation where morphs are replaced by their canonical forms
 new_segm = [x[47] for x in elp]
 old_segm = [x[47] for x in elp]
+allo_segm = [x[47] for x in elp]
 
 ################################################################
 ### Apply miscellaneous fixes to erroneous ELP segmentations ###
 ################################################################
 
-# >ally> is often segmented as {ally}, even though it is clearly the suffix
-new_segm = [re.sub(r"(^.+){ally}$", r'\1>ally>', segm) for segm in new_segm]
-
-# <up< is often segmented as {up}, even though it is clearly the prefix
-new_segm = [re.sub(r"\{up\}(.+)", r'<up<\1', segm) for segm in new_segm]
-
 # 1. Remove non-derivational suffixes: ed/d, ing, s, and contractions like 'll, 's, etc.
 new_segm = [re.sub(r">(ed|d|ing|s|\w*'\w*)>$", '', segm) for segm in new_segm]
-
-# 2. Move the --o at the beginning of some classical greco latin morphemes to the end of
-#    their immediate left neighbor .
-# regex = r'--o(log|scop|graph|meter|metr|toluene|nym|tom|gen|gram|gon|nom|man)'
-# new_segm = [re.sub(regex, 'o--\1', segm) for segm in new_segm]
-
-# 3. Assign prefix/root/suffix status to underannotated sequences between curly brackets
-#    following these rules:
-#    - any morpheme that is ALL of the following: 
-#         - between curly brackets
-#         - that occurs by itself in the database
-#         - of length > 3
-#         - that doesn't start with an uppercase character
-#           (to filter proper nouns, e.g., <e<{vince} isn't good, but caused by {Vince})
-
-#           OR that is:
-#         - between curly brackets
-#         - a greco-latin morpheme
-#      is a root.
-
-#    - everything in curly brackets to the left of a root is a prefix
-#    - everything in curly brackets to the right of a root is a suffix
-# 4. Mark all classical greco-latin morphemes roots as such
 
 free_roots = [re.sub(r'[{}]', '', x) for i,x in enumerate(new_segm)
               if not re.search(r'([<>-]|\}\{)', x)  # Must be only morpheme in x
@@ -120,23 +93,17 @@ free_roots = [re.sub(r'[{}]', '', x) for i,x in enumerate(new_segm)
                  and len(x) > 5                     # Must have more than 3 chars (+2 for {})
                  and not elp[i][1][0].isupper()]    # Word can't begin with uppercase letter
 
-# with open(e_roots_fp) as f:
-#     e_roots = f.read().split('\n')
-
-# with open(c_roots_fp) as f:
-#     c_roots = f.read().split('\n')
-
 with open(roots_fp) as f:
     roots = set(f.read().split('\n'))
-
-# with open(e_non_roots_fp) as f:
-#     e_non_roots = f.read().split('\n')
-
-# with open(c_non_roots_fp) as f:
-#     c_non_roots = f.read().split('\n')
-
 with open(non_roots_fp) as f:
     non_roots = set(f.read().split('\n'))
+
+with open(allo_prefs_fp) as f:
+    allo_prefs = json.load(f)
+with open(allo_roots_fp) as f:
+    allo_roots = json.load(f)
+with open(allo_suffs_fp) as f:
+    allo_suffs = json.load(f)
 
 roots = roots.union(set(free_roots)) - set(non_roots)
 
@@ -144,7 +111,9 @@ roots = roots.union(set(free_roots)) - set(non_roots)
 for i, segm in enumerate(new_segm):
     rts = [x for x in re.findall(r'[<>{}-](.+?)[<>{}-]', segm) if x in roots]
     for r in rts:
+        allo_r = allo_roots[r] if r in allo_roots else r
         new_segm[i] = new_segm[i].replace(r, '('+r+')')
+        allo_segm[i] = allo_segm[i].replace(r, '('+allo_r+')')
 
 # Remove affix notation where we changed to root notation
 new_segm = [re.sub(r'[><](\(\w+?\))[><]', r'\1', x) for x in new_segm]
@@ -157,9 +126,11 @@ for i, segm in enumerate(new_segm):
     suffs = re.findall(r'--\w+', suffs_sequence)
     # ['--ec', '--tom', '--y', '--stuff']
     for suff in suffs:
+        allo_s = allo_suffs[suff] if suff in allo_suffs else suff
         # Take care to replace only last occurrence of suff
         # (There could be a prefix with the same spelling)
         new_segm[i] = rreplace(new_segm[i], suff, '>'+suff+'>', 1)
+        allo_segm[i] = rreplace(allo_segm[i], suff, '>'+allo_s+'>', 1)
 
 # Annotate prefixes between curly brackets
 for i, segm in enumerate(new_segm):
@@ -167,20 +138,27 @@ for i, segm in enumerate(new_segm):
     # Output for {re--anti--pre--(hyster)--ec--tom--y--(other)--stuff}
     # ['re--', 'anti--', 'pre--']
     for pref in prefs:
+        allo_p = allo_prefs[pref] if pref in allo_prefs else pref
         # Take care to replace only first occurrence of pref
         # (There could be a suffix with the same spelling)
         new_segm[i] = new_segm[i].replace(pref, '<'+pref+'<', 1)
+        allo_segm[i] = allo_segm[i].replace(pref, '<'+allo_p+'<', 1)
 
 # Remove dashes
 new_segm = [x.replace('-', '') for x in new_segm]
+allo_segm = [x.replace('-', '') for x in allo_segm]
 
 # Any uninterrupted alphabetic sequence between curly brackets not marked as root
 # must be marked as root
 new_segm = [re.sub(r'\{(\w+)\}', r'{(\1)}', x) for x in new_segm]
+allo_segm = [re.sub(r'\{(\w+)\}', r'{(\1)}', x) for x in allo_segm]
 
 # Save elements of new_segm as the 48th column of the ELP database
 for i, segm in enumerate(new_segm):
     elp[i][48] = segm
+# Save elements of allo_segm as the 49th column of the ELP database
+for i, segm in enumerate(new_segm):
+    elp[i][49] = segm
 
 with open(output_fp, 'w') as f:
     writer = csv.writer(f)
