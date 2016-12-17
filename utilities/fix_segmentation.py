@@ -53,7 +53,7 @@ import json
 
 project_fp = '/home/hugo/Projects/ELP_morpho_vars'
 elp_fp = os.path.join(project_fp, 'input/ELP-2016-12-10.csv')
-output_fp = os.path.join(project_fp, 'input/ELP-2016-12-15.csv')
+output_fp = os.path.join(project_fp, 'input/ELP-2016-12-17.csv')
 roots_fp = os.path.join(project_fp, 'linguistic_data/roots.txt')
 non_roots_fp = os.path.join(project_fp, 'linguistic_data/non_roots.txt')
 allo_prefs_fp = os.path.join(project_fp, 'linguistic_data/rev_allomorphs_prefixes.json')
@@ -145,6 +145,10 @@ new_segm = [x.replace('-', '') for x in new_segm]
 # must be marked as root
 new_segm = [re.sub(r'\{(\w+)\}', r'{(\1)}', x) for x in new_segm]
 
+# In some cases, inflectional affixes were identified inside words
+# (e.g. >s> in {(sport)>s>(man)}). We now remove those.
+new_segm = [re.sub(r">(ed|d|ing|s|\w*'\w*)>", '', segm) for segm in new_segm]
+
 # Build allomorph-merged segmentations from new_segm
 allo_segm = new_segm[:]
 
@@ -162,6 +166,7 @@ for i, segm in enumerate(new_segm):
     for s in suffs:
         if s in allo_suffs:
             allo_segm[i] = rreplace(allo_segm[i], '>'+s+'>', '>'+allo_suffs[s]+'>', 1)
+
 
 # Save elements of new_segm as the 48th column of the ELP database
 for i, segm in enumerate(new_segm):
