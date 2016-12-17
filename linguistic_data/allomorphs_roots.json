@@ -19,6 +19,10 @@
     "administer",
     "administr"
   ],
+  "aero": [
+    "aero",
+    "aer"
+  ],
   "agri": [
     "agri",
     "agro"
@@ -105,9 +109,13 @@
     "archaeo",
     "archeo"
   ],
-  "aero": [
-    "aero",
-    "aer"
+  "ardor": [
+    "ardor",
+    "ardour"
+  ],
+  "armor": [
+    "armor",
+    "armour"
   ],
   "artifice": [
     "artifice",
@@ -134,6 +142,15 @@
   "auto": [
     "auto",
     "aut"
+  ],
+  "automata": [
+    "automata",
+    "automat",
+    "automaton"
+  ],
+  "axe": [
+    "axe",
+    "ax"
   ],
   "bake": [
     "bake",
@@ -173,6 +190,10 @@
     "brag",
     "bragg"
   ],
+  "breath": [
+    "breath",
+    "breathe"
+  ],
   "breed": [
     "breed",
     "bred"
@@ -180,6 +201,11 @@
   "brevi": [
     "brevi",
     "bbrevi"
+  ],
+  "britain": [
+    "britain",
+    "britann",
+    "brit"
   ],
   "bronchi": [
     "bronch",
@@ -211,6 +237,10 @@
   "candid": [
     "candid",
     "candide"
+  ],
+  "candor": [
+    "candor",
+    "candour"
   ],
   "cantho": [
     "canth",
@@ -279,6 +309,10 @@
     "chem",
     "chemi"
   ],
+  "child": [
+    "child",
+    "children"
+  ],
   "china": [
     "china",
     "chin"
@@ -315,6 +349,10 @@
     "clam",
     "clamm"
   ],
+  "clamor": [
+    "clamor",
+    "clamour"
+  ],
   "clear": [
     "clear",
     "clar"
@@ -348,18 +386,21 @@
     "coif",
     "coiff"
   ],
+  "color": [
+    "color",
+    "colour"
+  ],
   "compan": [
     "compan",
     "ccompan"
   ],
-  "plement":["plement", "pplement"],
-  "child":["child", "children"],
-  "compete":["compete", "compet"],
   "compare": [
     "compar"
   ],
-  "axe":["axe", "ax"],
-  "breath":["breath", "breathe"],
+  "compete": [
+    "compete",
+    "compet"
+  ],
   "concile": [
     "concile",
     "concil"
@@ -515,9 +556,10 @@
     "disaster",
     "distatr"
   ],
-  "distill":["distill", "distil"],
-  "rob":["rob", "robb"],
-  "satis":["satis", "sati"],
+  "discours": [
+    "discourse",
+    "discurs"
+  ],
   "disk": [
     "disk",
     "disc",
@@ -527,6 +569,10 @@
     "dispute",
     "disput"
   ],
+  "distill": [
+    "distill",
+    "distil"
+  ],
   "divide": [
     "divide",
     "divid",
@@ -534,6 +580,10 @@
   ],
   "domin": [
     "domin"
+  ],
+  "dominic": [
+    "dominic",
+    "dominica"
   ],
   "donto": [
     "dont",
@@ -566,19 +616,30 @@
     "imperi",
     "empire"
   ],
+  "endeavor": [
+    "endeavor",
+    "endeavour"
+  ],
   "enter": [
     "enter",
     "entr"
+  ],
+  "enthuse": [
+    "enthuse",
+    "enthus"
   ],
   "equi": [
     "equi",
     "equ"
   ],
+  "escape": [
+    "escape",
+    "escap"
+  ],
   "eschato": [
     "eschato",
     "eschat"
   ],
-  "escape":["escape", "escap"],
   "ethn": [
     "ethn",
     "ethno"
@@ -586,6 +647,10 @@
   "euro": [
     "euro",
     "eur"
+  ],
+  "event": [
+    "event",
+    "eventu"
   ],
   "example": [
     "example",
@@ -640,6 +705,10 @@
   "five": [
     "five",
     "fif"
+  ],
+  "flavor": [
+    "flavor",
+    "flavour"
   ],
   "flor": [
     "flor",
@@ -726,6 +795,10 @@
   "gigant": [
     "giganto",
     "gigant"
+  ],
+  "glamour": [
+    "glamour",
+    "glamor"
   ],
   "globe": [
     "globe",
@@ -830,6 +903,10 @@
     "hali",
     "halio"
   ],
+  "harbor": [
+    "harbor",
+    "harbour"
+  ],
   "harmon": [
     "harmon",
     "harmony"
@@ -837,6 +914,10 @@
   "hema": [
     "hema",
     "hemo"
+  ],
+  "hemo": [
+    "hemo",
+    "hema"
   ],
   "hepat": [
     "hepat",
@@ -849,6 +930,10 @@
   ],
   "hetero": [
     "hetero"
+  ],
+  "hide": [
+    "hid",
+    "hide"
   ],
   "hiero": [
     "hier",
@@ -874,9 +959,21 @@
   "homo": [
     "homo"
   ],
+  "honor": [
+    "honor",
+    "honour"
+  ],
+  "hour": [
+    "hour",
+    "hor"
+  ],
   "hume": [
     "hume",
     "hum"
+  ],
+  "humor": [
+    "humor",
+    "humour"
   ],
   "hydr": [
     "hydr",
@@ -971,10 +1068,18 @@
     "labi",
     "labia"
   ],
+  "labor": [
+    "labor",
+    "labour"
+  ],
   "lact": [
     "lact",
     "lacto",
     "lacti"
+  ],
+  "land": [
+    "land",
+    "lland"
   ],
   "laryng": [
     "laryng",
@@ -1044,6 +1149,10 @@
     "lobo",
     "lob"
   ],
+  "local": [
+    "local",
+    "locale"
+  ],
   "locate": [
     "locate",
     "llocate"
@@ -1076,10 +1185,6 @@
     "lucre",
     "lucr"
   ],
-  "val":["val", "vale"],
-  "urge":["urge", "urg"],
-  "wait":["wait", "waite"],
-  "phobe":["phobe", "phob"],
   "lumin": [
     "lumin",
     "llumin",
@@ -1119,14 +1224,14 @@
     "maison",
     "maisonn"
   ],
+  "make": [
+    "make",
+    "made"
+  ],
   "mani": [
     "mani",
     "manu"
   ],
-  "britain":["britain", "britann", "brit"],
-  "discours":["discourse", "discurs"],
-  "hemo":["hemo", "hema"],
-  "land":["land", "lland"],
   "mania": [
     "mania",
     "mane",
@@ -1247,8 +1352,6 @@
     "mom",
     "momm"
   ],
-  "dominic":["dominic", "dominica"],
-  "hide":["hid", "hide"],
   "monster": [
     "monster",
     "monstr"
@@ -1379,6 +1482,10 @@
     "ocul",
     "oculo"
   ],
+  "odor": [
+    "odor",
+    "odour"
+  ],
   "office": [
     "office",
     "offic"
@@ -1425,6 +1532,10 @@
   "pariet": [
     "pariet",
     "parieto"
+  ],
+  "parlor": [
+    "parlor",
+    "parlour"
   ],
   "particle": [
     "particle",
@@ -1486,12 +1597,15 @@
     "phile",
     "philo"
   ],
+  "phobe": [
+    "phobe",
+    "phob"
+  ],
   "phon": [
     "phon",
     "phone",
     "phono"
   ],
-  "local":["local", "locale"],
   "phosphor": [
     "phosph",
     "phospho",
@@ -1550,6 +1664,10 @@
   "please": [
     "please",
     "pleas"
+  ],
+  "plement": [
+    "plement",
+    "pplement"
   ],
   "plen": [
     "plen",
@@ -1643,6 +1761,10 @@
     "proxim",
     "pproxim"
   ],
+  "prud": [
+    "prud",
+    "prude"
+  ],
   "pseudo": [
     "pseud",
     "pseudo"
@@ -1697,8 +1819,16 @@
     "radi",
     "rradi"
   ],
+  "rancor": [
+    "rancor",
+    "rancour"
+  ],
   "raptor": [
     "raptor"
+  ],
+  "rational": [
+    "rational",
+    "rationale"
   ],
   "rect": [
     "recti",
@@ -1714,7 +1844,10 @@
     "reg",
     "regi"
   ],
-  "register":["register", "registr"],
+  "register": [
+    "register",
+    "registr"
+  ],
   "remember": [
     "remember",
     "remembr"
@@ -1735,6 +1868,14 @@
     "rhiza",
     "rhizo"
   ],
+  "rigor": [
+    "rigor",
+    "rigour"
+  ],
+  "rob": [
+    "rob",
+    "robb"
+  ],
   "rrhoea": [
     "rrhoea",
     "rrhea"
@@ -1742,6 +1883,10 @@
   "rubr": [
     "ruber",
     "rubr"
+  ],
+  "rumor": [
+    "rumor",
+    "rumour"
   ],
   "rupt": [
     "rupt",
@@ -1766,11 +1911,19 @@
     "sancti",
     "sancto"
   ],
+  "satis": [
+    "satis",
+    "sati"
+  ],
   "saur": [
     "saur",
     "saura",
     "sauro",
     "saurus"
+  ],
+  "savor": [
+    "savor",
+    "savour"
   ],
   "schizo": [
     "schiz",
@@ -1872,7 +2025,6 @@
     "solut",
     "solute"
   ],
-  "make":["make", "made"],
   "solve": [
     "solve",
     "ssolve",
@@ -1930,6 +2082,10 @@
   "spit": [
     "spitt"
   ],
+  "splendor": [
+    "splendor",
+    "splendour"
+  ],
   "spor": [
     "spor",
     "sporo",
@@ -1968,6 +2124,10 @@
     "stetho",
     "steth"
   ],
+  "stimul": [
+    "stimul",
+    "stimulus"
+  ],
   "stitute": [
     "stitu",
     "stitue",
@@ -1983,8 +2143,6 @@
     "strat",
     "strato"
   ],
-  "prud":["prud", "prude"],
-  "rational":["rational", "rationale"],
   "strepto": [
     "strepto",
     "strept"
@@ -1998,9 +2156,17 @@
     "substant",
     "substance"
   ],
+  "succor": [
+    "succor",
+    "succour"
+  ],
   "suck": [
     "suck",
     "suct"
+  ],
+  "suffice": [
+    "suffice",
+    "suffic"
   ],
   "sulph": [
     "sulf",
@@ -2082,8 +2248,6 @@
     "theatr",
     "theatre"
   ],
-  "stimul":["stimul", "stimulus"],
-  "suffice":["suffice", "suffic"],
   "theo": [
     "the",
     "theo"
@@ -2100,6 +2264,10 @@
   "thrombo": [
     "thromb",
     "thrombo"
+  ],
+  "through": [
+    "through",
+    "thru"
   ],
   "thylaco": [
     "thylac",
@@ -2151,6 +2319,10 @@
     "tubul",
     "tubulo"
   ],
+  "tumor": [
+    "tumor",
+    "tumour"
+  ],
   "typo": [
     "type",
     "otype",
@@ -2162,6 +2334,10 @@
     "tyran",
     "tyrann",
     "tyrant"
+  ],
+  "urge": [
+    "urge",
+    "urg"
   ],
   "utero": [
     "uter",
@@ -2177,10 +2353,22 @@
     "vagino",
     "vagina"
   ],
+  "val": [
+    "val",
+    "vale"
+  ],
+  "valor": [
+    "valor",
+    "valour"
+  ],
   "value": [
     "value",
     "valu",
     "valua"
+  ],
+  "vapor": [
+    "vapor",
+    "vapour"
   ],
   "vapour": [
     "vapour",
@@ -2200,9 +2388,6 @@
     "ventri",
     "ventro"
   ],
-  "automata":["automata", "automat", "automaton"],
-  "event":["event", "eventu"],
-  "enthuse":["enthuse", "enthus"],
   "veri": [
     "ver",
     "veri"
@@ -2230,6 +2415,10 @@
   "vide": [
     "vide",
     "vid"
+  ],
+  "vigor": [
+    "vigor",
+    "vigour"
   ],
   "viscer": [
     "viscer",
@@ -2262,6 +2451,10 @@
     "vulv",
     "vulvo",
     "vulva"
+  ],
+  "wait": [
+    "wait",
+    "waite"
   ],
   "war": [
     "war",
