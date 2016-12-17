@@ -29,7 +29,6 @@ arian
 arity
 arium
 ary
-circum
 as
 ast
 ate
@@ -204,6 +203,8 @@ lise
 liz
 lize
 lude
+sym
+syn
 ly
 lyse
 lysis
