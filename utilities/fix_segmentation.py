@@ -48,16 +48,17 @@ Hypo-segmentation:
 import csv
 import re
 import os
+import json
 
 
 project_fp = '/home/hugo/Projects/ELP_morpho_vars'
 elp_fp = os.path.join(project_fp, 'input/ELP-2016-12-10.csv')
-output_fp = os.path.join(project_fp, 'input/ELP-2016-12-14.csv')
+output_fp = os.path.join(project_fp, 'input/ELP-2016-12-15.csv')
 roots_fp = os.path.join(project_fp, 'linguistic_data/roots.txt')
 non_roots_fp = os.path.join(project_fp, 'linguistic_data/non_roots.txt')
-allo_prefs_fp = os.path.join(project_fp, 'linguistic_data/rev_allomorphes_prefixes.json')
-allo_roots_fp = os.path.join(project_fp, 'linguistic_data/rev_allomorphes_roots.json')
-allo_suffs_fp = os.path.join(project_fp, 'linguistic_data/rev_allomorphes_suffixes.json')
+allo_prefs_fp = os.path.join(project_fp, 'linguistic_data/rev_allomorphs_prefixes.json')
+allo_roots_fp = os.path.join(project_fp, 'linguistic_data/rev_allomorphs_roots.json')
+allo_suffs_fp = os.path.join(project_fp, 'linguistic_data/rev_allomorphs_suffixes.json')
 
 def rreplace(s, old, new, count):
     """ Replaces only the rightmost occurrence of old in string s, count times."""
@@ -78,7 +79,6 @@ with open(elp_fp) as f:
 # allo_segm will hold the segmentation where morphs are replaced by their canonical forms
 new_segm = [x[47] for x in elp]
 old_segm = [x[47] for x in elp]
-allo_segm = [x[47] for x in elp]
 
 ################################################################
 ### Apply miscellaneous fixes to erroneous ELP segmentations ###
@@ -111,9 +111,7 @@ roots = roots.union(set(free_roots)) - set(non_roots)
 for i, segm in enumerate(new_segm):
     rts = [x for x in re.findall(r'[<>{}-](.+?)[<>{}-]', segm) if x in roots]
     for r in rts:
-        allo_r = allo_roots[r] if r in allo_roots else r
         new_segm[i] = new_segm[i].replace(r, '('+r+')')
-        allo_segm[i] = allo_segm[i].replace(r, '('+allo_r+')')
 
 # Remove affix notation where we changed to root notation
 new_segm = [re.sub(r'[><](\(\w+?\))[><]', r'\1', x) for x in new_segm]
@@ -126,11 +124,9 @@ for i, segm in enumerate(new_segm):
     suffs = re.findall(r'--\w+', suffs_sequence)
     # ['--ec', '--tom', '--y', '--stuff']
     for suff in suffs:
-        allo_s = allo_suffs[suff] if suff in allo_suffs else suff
         # Take care to replace only last occurrence of suff
         # (There could be a prefix with the same spelling)
         new_segm[i] = rreplace(new_segm[i], suff, '>'+suff+'>', 1)
-        allo_segm[i] = rreplace(allo_segm[i], suff, '>'+allo_s+'>', 1)
 
 # Annotate prefixes between curly brackets
 for i, segm in enumerate(new_segm):
@@ -138,26 +134,40 @@ for i, segm in enumerate(new_segm):
     # Output for {re--anti--pre--(hyster)--ec--tom--y--(other)--stuff}
     # ['re--', 'anti--', 'pre--']
     for pref in prefs:
-        allo_p = allo_prefs[pref] if pref in allo_prefs else pref
         # Take care to replace only first occurrence of pref
         # (There could be a suffix with the same spelling)
         new_segm[i] = new_segm[i].replace(pref, '<'+pref+'<', 1)
-        allo_segm[i] = allo_segm[i].replace(pref, '<'+allo_p+'<', 1)
 
 # Remove dashes
 new_segm = [x.replace('-', '') for x in new_segm]
-allo_segm = [x.replace('-', '') for x in allo_segm]
 
 # Any uninterrupted alphabetic sequence between curly brackets not marked as root
 # must be marked as root
 new_segm = [re.sub(r'\{(\w+)\}', r'{(\1)}', x) for x in new_segm]
-allo_segm = [re.sub(r'\{(\w+)\}', r'{(\1)}', x) for x in allo_segm]
+
+# Build allomorph-merged segmentations from new_segm
+allo_segm = new_segm[:]
+
+# Replace each morph by its canonical form, if any
+for i, segm in enumerate(new_segm):
+    prefs = re.findall(r'<(\w+)<', segm)
+    rts = re.findall(r'\((\w+)\)', segm)
+    suffs = re.findall(r'>(\w+)>', segm)
+    for p in prefs:
+        if p in allo_prefs:
+            allo_segm[i] = allo_segm[i].replace('<'+p+'<', '<'+allo_prefs[p]+'<')        
+    for r in rts:
+        if r in allo_roots:
+            allo_segm[i] = allo_segm[i].replace('('+r+')', '('+allo_roots[r]+')')
+    for s in suffs:
+        if s in allo_suffs:
+            allo_segm[i] = rreplace(allo_segm[i], '>'+s+'>', '>'+allo_suffs[s]+'>', 1)
 
 # Save elements of new_segm as the 48th column of the ELP database
 for i, segm in enumerate(new_segm):
     elp[i][48] = segm
 # Save elements of allo_segm as the 49th column of the ELP database
-for i, segm in enumerate(new_segm):
+for i, segm in enumerate(allo_segm):
     elp[i][49] = segm
 
 with open(output_fp, 'w') as f:
