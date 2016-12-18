@@ -33,11 +33,12 @@ import copy
 import os
 import re
 import csv
+import json
 import nltk
 
 PROJECT_PATH = '/home/hugo/Projects/ELP_morpho_vars/'
 # SEGM_DB_PATH = os.path.join(PROJECT_PATH, 'ELP_segmentations_no_flex.csv')
-DB_PATH = os.path.join(PROJECT_PATH, '/home/hugo/Projects/ELP_morpho_vars/input/ELP-2016-11-26.csv')
+DB_PATH = os.path.join(PROJECT_PATH, '/home/hugo/Projects/ELP_morpho_vars/input/ELP-2016-12-17.csv')
 VARS_SAVE_PATH = os.path.join(PROJECT_PATH, 'output/ELP_morphological_variables.csv')
 HAPAX_SBTL_FREQ_THRESHOLD = 0.02
 HAPAX_HAL_FREQ_THRESHOLD = 1
@@ -46,7 +47,7 @@ DB_WORD_COL = 1
 DB_POS_COL = 2
 DB_HAL_FREQ_COL = 25
 DB_SBTL_FREQ_COL = 27
-DB_SEGM_COL = 48
+DB_SEGM_COL = 49
 
 
 def apply_morpho_vars_to_lex_db(db, morpho_vars):
@@ -59,19 +60,22 @@ def apply_morpho_vars_to_lex_db(db, morpho_vars):
     for row in db:
         # temp = copy.deepcopy(row)
         segm = row[DB_SEGM_COL]
+        if segm == "NULL":
+            continue
         prs = get_PRS_signature(row[DB_SEGM_COL])
         if prs not in res.keys():
             res[prs] = []
         morphemes = get_morphemes(segm)
-        wordlen = len(row[DB_WORD_COL])
         n_morphemes = len(morphemes)
         prs_string = ','.join([str(x) for x in prs])
-        temp = [row[DB_ITEMID_COL], row[DB_WORD_COL], row[DB_POS_COL], wordlen, 
+        temp = [row[DB_ITEMID_COL], row[DB_WORD_COL], row[DB_POS_COL],
                 n_morphemes, prs_string, segm]
+        # freq = int(row[DB_HAL_FREQ_COL])
+        # Any morpheme would do, we use the first.
+        freq = morpho_vars[morphemes[0]]['family'][segm] if morphemes else None
         for m in morphemes:
-            freq = morpho_vars[m]['hal_freq']
-            rel_fam_freq = get_relative_fam_freq(m, db, segm, freq,
-                                                 morpho_vars[m]['family'])
+            rel_fam_freq = get_family_frequency_rank(m, db, segm, freq,
+                                                     morpho_vars[m]['family'])
             m_vars = [morpho_vars[m]['family_size'],
                       morpho_vars[m]['hal_freq'],
                       rel_fam_freq,
@@ -92,7 +96,6 @@ def compute_morphological_variables(db, hapax_set):
     - summed token frequency
     - p-measure
     - p*-measure
-    - % of family more frequent (PFMF)
     """
     morpho_vars = {}
     counted = set()
@@ -130,25 +133,25 @@ def generate_headers(prs):
     headers = []
     for i in range(1, p+1):
         headers.extend(['PREF%d_FamSize' % i, 
-                        'PREF%d_Freq_HAL' % i, 'PREF%d_%%FamMoreFreq_HAL' % i,
-                        'PREF%d_P_HAL' % i, 'PREF%d_P*' % i
+                        'PREF%d_Freq_HAL' % i, 'PREF%d_FFR' % i,
+                        'PREF%d_P' % i, 'PREF%d_P*' % i
                         ])
     for i in range(1, r+1):
         headers.extend(['ROOT%d_FamSize' % i, 
-                        'ROOT%d_Freq_HAL' % i, 'ROOT%d_%%FamMoreFreq_HAL' % i,
-                        'ROOT%d_P_HAL' % i, 'ROOT%d_P*' % i
+                        'ROOT%d_Freq_HAL' % i, 'ROOT%d_FFR' % i,
+                        'ROOT%d_P' % i, 'ROOT%d_P*' % i
                         ])
     for i in range(1, s+1):
         headers.extend(['SUFF%d_FamSize' % i, 
-                        'SUFF%d_Freq_HAL' % i, 'SUFF%d_%%FamMoreFreq_HAL' % i,
-                        'SUFF%d_P_HAL' % i, 'SUFF%d_P*' % i
+                        'SUFF%d_Freq_HAL' % i, 'SUFF%d_FFR' % i,
+                        'SUFF%d_P' % i, 'SUFF%d_P*' % i
                        ])
     return headers
 
 
 def get_family(morpheme, db):
     """
-    Returns a dict {WORD: {'hal': HAL_FREQUENCY, 'sbtl': SBTL:FREQUENCY}} of all the words
+    Returns a dict {WORD: HAL_FREQUENCY} of all the words
     in database that contain the morpheme.
     
     Since we deleted non-derivational suffixes from segm, two different words
@@ -163,9 +166,8 @@ def get_family(morpheme, db):
         segm = row[DB_SEGM_COL]
         if morpheme in segm:
             if segm not in family:
-                family[segm] = {'hal_freq': 0}
-            family[segm]['hal_freq'] += row[DB_HAL_FREQ_COL]
-
+                family[segm] = 0
+            family[segm] += row[DB_HAL_FREQ_COL]
     return family
 
 
@@ -205,17 +207,18 @@ def get_PRS_signature(segm):
     return (n_pref, n_root, n_suff)
 
 
-def get_relative_fam_freq(morpheme, db, segm, word_freq, family):
+def get_family_frequency_rank(morpheme, db, segm, word_freq, family):
     """
-    Given a word and one of its morphemes, return the percentage of words in db
-    that contain the same morpheme and are more frequent.
+    Given a word and one of its morphemes, return the frequency ranking of this word in db
+    compared to other words containing the morpheme. For example, the most frequent word
+    containing '-able' has a FFR of 1 with respect to '-able'.
     """
-    if len(family) == 1:
-        return 0
-    family.pop(segm, None)
-    more_frequent_in_fam_hal = sum([1 for x in family.values()
-                                    if x['hal_freq'] > word_freq])
-    return (more_frequent_in_fam_hal / len(family)) * 100
+    ffr = sum([1 for x in family.values() if x > word_freq]) + 1
+    if morpheme == '(algorithm)':
+        print(word_freq)
+        print(family)
+        print(ffr)
+    return ffr
 
 
 def merge_new_data_with_database(prs_data, main_db):
@@ -309,12 +312,16 @@ if __name__ == '__main__':
     with open(DB_PATH) as database:
         db = [x for x in list(csv.reader(database))[2:] if x]  # skip headers (2 rows)
 
-    print('preprocessing db')
-    db = preprocess_db(db)
-    print('getting hapax set')
-    hapax_set = get_hapax_set(db)
-    print('computing morphological variables')
-    morpho_vars = compute_morphological_variables(db, hapax_set)
+    # print('preprocessing db')
+    # db = preprocess_db(db)
+    # print('getting hapax set')
+    # hapax_set = get_hapax_set(db)
+    # print('computing morphological variables')
+    # morpho_vars = compute_morphological_variables(db, hapax_set)
+    # with open('morpho_vars.json', 'w') as f:
+    #     json.dump(morpho_vars, f)
+    with open('morpho_vars.json') as f:
+        morpho_vars = json.load(f)
     print('applying morphological variables to database')
     new_data_by_prs = apply_morpho_vars_to_lex_db(db, morpho_vars)
 
@@ -328,12 +335,12 @@ if __name__ == '__main__':
     # merged_data = merge_new_data_with_database(new_data_by_prs, main_db)
 
     # create output directory if it doesn't exist already
-    os.makedirs('output', exist_ok=True)
-    headers = ['ELP_ItemID', 'Word', 'POS', 'Length', 'Nmorph', 'PRS_signature', 
+    os.makedirs('output_1', exist_ok=True)
+    headers = ['ELP_ItemID', 'Word', 'POS', 'Nmorph', 'PRS_signature', 
                'MorphoLexSegm']
     for prs, data in new_data_by_prs.items():
         prs_str = re.sub(r'[,()]', '', str(prs))
-        savepath = os.path.join(PROJECT_PATH, 'output/%s.csv' % prs_str)
+        savepath = os.path.join(PROJECT_PATH, 'output_1/%s.csv' % prs_str)
         with open(savepath, 'w') as f:
             csvwriter = csv.writer(f)
             csvwriter.writerow(headers + generate_headers(prs))
