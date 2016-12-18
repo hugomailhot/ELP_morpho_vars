@@ -56,6 +56,7 @@ elp_fp = os.path.join(project_fp, 'input/ELP-2016-12-10.csv')
 output_fp = os.path.join(project_fp, 'input/ELP-2016-12-17.csv')
 roots_fp = os.path.join(project_fp, 'linguistic_data/roots.txt')
 non_roots_fp = os.path.join(project_fp, 'linguistic_data/non_roots.txt')
+prefixes_fp = os.path.join(project_fp, 'linguistic_data/prefixes.txt')
 allo_prefs_fp = os.path.join(project_fp, 'linguistic_data/rev_allomorphs_prefixes.json')
 allo_roots_fp = os.path.join(project_fp, 'linguistic_data/rev_allomorphs_roots.json')
 allo_suffs_fp = os.path.join(project_fp, 'linguistic_data/rev_allomorphs_suffixes.json')
@@ -87,6 +88,7 @@ old_segm = [x[47] for x in elp]
 # 1. Remove non-derivational suffixes: ed/d, ing, s, and contractions like 'll, 's, etc.
 new_segm = [re.sub(r">(ed|d|ing|s|\w*'\w*)>$", '', segm) for segm in new_segm]
 
+### Build the set of roots ###
 free_roots = [re.sub(r'[{}]', '', x) for i,x in enumerate(new_segm)
               if not re.search(r'([<>-]|\}\{)', x)  # Must be only morpheme in x
                                                     # ("}{" would mean two roots)
@@ -98,16 +100,10 @@ with open(roots_fp) as f:
 with open(non_roots_fp) as f:
     non_roots = set(f.read().split('\n'))
 
-with open(allo_prefs_fp) as f:
-    allo_prefs = json.load(f)
-with open(allo_roots_fp) as f:
-    allo_roots = json.load(f)
-with open(allo_suffs_fp) as f:
-    allo_suffs = json.load(f)
-
 roots = roots.union(set(free_roots)) - set(non_roots)
 
-# Annotate roots
+
+### Correctly annotate roots ###
 for i, segm in enumerate(new_segm):
     rts = [x for x in re.findall(r'[<>{}-](.+?)[<>{}-]', segm) if x in roots]
     for r in rts:
@@ -115,6 +111,17 @@ for i, segm in enumerate(new_segm):
 
 # Remove affix notation where we changed to root notation
 new_segm = [re.sub(r'[><](\(\w+?\))[><]', r'\1', x) for x in new_segm]
+
+### Correctly annotate prefixes marked as roots ###
+with open(prefixes_fp) as f:
+    prefixes = set(f.read().split('\n'))
+
+for i, segm in enumerate(new_segm):
+    pfs = [x for x in re.findall(r'\{(.+?)\}', segm) 
+           if x in prefixes and segm.count('{') > 1]  
+           # Last condition to ensure there will be a root left (eg not get <up<>er>)
+    for p in pfs:
+        new_segm[i] = new_segm[i].replace('{'+p+'}', '<'+p+'<')
 
 # Annotate suffixes between curly brackets
 for i, segm in enumerate(new_segm):
@@ -149,6 +156,18 @@ new_segm = [re.sub(r'\{(\w+)\}', r'{(\1)}', x) for x in new_segm]
 # (e.g. >s> in {(sport)>s>(man)}). We now remove those.
 new_segm = [re.sub(r">(ed|d|ing|s|\w*'\w*)>", '', segm) for segm in new_segm]
 
+
+##############################
+### Allomorph merging step ###
+##############################
+
+with open(allo_prefs_fp) as f:
+    allo_prefs = json.load(f)
+with open(allo_roots_fp) as f:
+    allo_roots = json.load(f)
+with open(allo_suffs_fp) as f:
+    allo_suffs = json.load(f)
+
 # Build allomorph-merged segmentations from new_segm
 allo_segm = new_segm[:]
 
@@ -166,7 +185,6 @@ for i, segm in enumerate(new_segm):
     for s in suffs:
         if s in allo_suffs:
             allo_segm[i] = rreplace(allo_segm[i], '>'+s+'>', '>'+allo_suffs[s]+'>', 1)
-
 
 # Save elements of new_segm as the 48th column of the ELP database
 for i, segm in enumerate(new_segm):
