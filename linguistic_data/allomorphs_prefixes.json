@@ -14,15 +14,12 @@
     "anti",
     "anto"
   ],
-  "arch": [
-    "arch",
-    "archi"
-  ],
   "bi": [
     "bi"
   ],
   "centi": [
-    "centi"
+    "centi",
+    "cent"
   ],
   "co": [
     "co",
@@ -35,7 +32,8 @@
     "des"
   ],
   "deca": [
-    "deca"
+    "deca",
+    "deci"
   ],
   "di": [
     "di"
@@ -44,6 +42,8 @@
     "en",
     "em"
   ],
+  "extra":["extra", "extro"],
+  "fore":["for", "fore"],
   "hect": [
     "hect",
     "hecto"
@@ -54,13 +54,14 @@
   "hexa": [
     "hexa"
   ],
-  "in": [
+  "im": [
     "i",
     "im",
     "in",
     "ig",
     "il"
   ],
+  "intra":["intro", "intra"],
   "kilo": [
     "kilo"
   ],
@@ -93,7 +94,8 @@
     "nona"
   ],
   "octo": [
-    "octo"
+    "octo",
+    "oct"
   ],
   "penta": [
     "penta"
@@ -125,12 +127,16 @@
   "sexa": [
     "sexa"
   ],
+  "super":["super", "supra"],
   "tetra": [
     "tetra",
     "tetr",
     "tetro"
   ],
-  "sym":["sym", "syn"],
+  "through": [
+    "through",
+    "thru"
+  ],
   "trans": [
     "trans",
     "tran",

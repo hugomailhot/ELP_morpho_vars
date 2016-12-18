@@ -2184,9 +2184,10 @@
     "sure",
     "ssure"
   ],
-  "sym": [
+  "syn": [
     "sym",
-    "sy"
+    "sy",
+    "syn"
   ],
   "synchro": [
     "synchr",
@@ -2264,10 +2265,6 @@
   "thrombo": [
     "thromb",
     "thrombo"
-  ],
-  "through": [
-    "through",
-    "thru"
   ],
   "thylaco": [
     "thylac",

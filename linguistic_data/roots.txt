@@ -1391,7 +1391,6 @@ otoluene
 otom
 otype
 otypo
-out
 ov
 ox
 pachy
@@ -2053,7 +2052,6 @@ thomp
 three
 thromb
 thrombo
-thru
 thylac
 thylacine
 thylacineo
