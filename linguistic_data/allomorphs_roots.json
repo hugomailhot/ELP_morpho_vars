@@ -422,6 +422,10 @@
     "corpuscle",
     "corpuscul"
   ],
+  "correct": [
+    "correct",
+    "corrig"
+  ],
   "cortico": [
     "cortic",
     "cortico"
@@ -608,8 +612,8 @@
     "echin"
   ],
   "electr": [
-    "electr",
-    "electro"
+    "elect",
+    "elig"
   ],
   "empire": [
     "imper",
@@ -631,6 +635,10 @@
   "equi": [
     "equi",
     "equ"
+  ],
+  "eros": [
+    "eros",
+    "erot"
   ],
   "escape": [
     "escape",
@@ -1045,6 +1053,12 @@
     "judici",
     "judice"
   ],
+  "jur": [
+    "jur",
+    "juri",
+    "juris",
+    "jure"
+  ],
   "kerat": [
     "kerat",
     "kerato"
@@ -1118,6 +1132,10 @@
     "leuk",
     "leuko"
   ],
+  "lev": [
+    "llevi",
+    "lev"
+  ],
   "lexic": [
     "lexic",
     "lexico",
@@ -1149,6 +1167,11 @@
     "lobo",
     "lob"
   ],
+  "loc": [
+    "loc",
+    "loco",
+    "lloc"
+  ],
   "local": [
     "local",
     "locale"
@@ -1176,6 +1199,10 @@
   ],
   "lopho": [
     "lopho"
+  ],
+  "loqu": [
+    "loqu",
+    "locut"
   ],
   "lubric": [
     "lubric",
@@ -1388,9 +1415,17 @@
     "nausea",
     "nause"
   ],
+  "navy": [
+    "navy",
+    "navig"
+  ],
   "necro": [
     "necr",
     "necro"
+  ],
+  "neglig": [
+    "neglig",
+    "negl"
   ],
   "negro": [
     "niger",
@@ -1464,6 +1499,14 @@
   "nyx": [
     "nyx",
     "nyxo"
+  ],
+  "obey": [
+    "obey",
+    "obei"
+  ],
+  "obsequi": [
+    "obsequi",
+    "obsequy"
   ],
   "occupy": [
     "occupy",
@@ -1875,6 +1918,10 @@
   "rob": [
     "rob",
     "robb"
+  ],
+  "rode": [
+    "rode",
+    "rrode"
   ],
   "rrhoea": [
     "rrhoea",
@@ -2349,6 +2396,10 @@
     "vagin",
     "vagino",
     "vagina"
+  ],
+  "vague": [
+    "vague",
+    "vag"
   ],
   "val": [
     "val",
