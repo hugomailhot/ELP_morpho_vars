@@ -38,7 +38,7 @@ import nltk
 
 PROJECT_PATH = '/home/hugo/Projects/ELP_morpho_vars/'
 # SEGM_DB_PATH = os.path.join(PROJECT_PATH, 'ELP_segmentations_no_flex.csv')
-DB_PATH = os.path.join(PROJECT_PATH, '/home/hugo/Projects/ELP_morpho_vars/input/ELP-2016-12-17.csv')
+DB_PATH = os.path.join(PROJECT_PATH, '/home/hugo/Projects/ELP_morpho_vars/input/ELP-2016-12-18.csv')
 VARS_SAVE_PATH = os.path.join(PROJECT_PATH, 'output/ELP_morphological_variables.csv')
 HAPAX_SBTL_FREQ_THRESHOLD = 0.02
 HAPAX_HAL_FREQ_THRESHOLD = 1
@@ -74,11 +74,12 @@ def apply_morpho_vars_to_lex_db(db, morpho_vars):
         # Any morpheme would do, we use the first.
         freq = morpho_vars[morphemes[0]]['family'][segm] if morphemes else None
         for m in morphemes:
-            rel_fam_freq = get_family_frequency_rank(m, db, segm, freq,
-                                                     morpho_vars[m]['family'])
-            m_vars = [morpho_vars[m]['family_size'],
+            ffr = get_family_frequency_rank(freq, morpho_vars[m]['family'])
+            pfmf = get_percentage_family_more_frequent(freq, morpho_vars[m]['family'])
+            m_vars = [ffr,
+                      pfmf,
+                      morpho_vars[m]['family_size'],
                       morpho_vars[m]['hal_freq'],
-                      rel_fam_freq,
                       morpho_vars[m]['hal_p'],
                       morpho_vars[m]['hal_p*']]
             temp.extend(m_vars)
@@ -132,18 +133,18 @@ def generate_headers(prs):
     p, r, s = int(prs[0]), int(prs[1]), int(prs[2])
     headers = []
     for i in range(1, p+1):
-        headers.extend(['PREF%d_FamSize' % i, 
-                        'PREF%d_Freq_HAL' % i, 'PREF%d_FFR' % i,
+        headers.extend(['PREF%d_FFR' % i, 'PREF%d_PFMF' % i, 
+                        'PREF%d_FamSize' % i, 'PREF%d_Freq_HAL' % i, 
                         'PREF%d_P' % i, 'PREF%d_P*' % i
                         ])
     for i in range(1, r+1):
-        headers.extend(['ROOT%d_FamSize' % i, 
-                        'ROOT%d_Freq_HAL' % i, 'ROOT%d_FFR' % i,
+        headers.extend(['ROOT%d_FFR' % i, 'ROOT%d_PFMF' % i,
+                        'ROOT%d_FamSize' % i, 'ROOT%d_Freq_HAL' % i, 
                         'ROOT%d_P' % i, 'ROOT%d_P*' % i
                         ])
     for i in range(1, s+1):
-        headers.extend(['SUFF%d_FamSize' % i, 
-                        'SUFF%d_Freq_HAL' % i, 'SUFF%d_FFR' % i,
+        headers.extend(['SUFF%d_FFR' % i, 'SUFF%d_PFMF' % i,
+                        'SUFF%d_FamSize' % i, 'SUFF%d_Freq_HAL' % i, 
                         'SUFF%d_P' % i, 'SUFF%d_P*' % i
                        ])
     return headers
@@ -207,18 +208,30 @@ def get_PRS_signature(segm):
     return (n_pref, n_root, n_suff)
 
 
-def get_family_frequency_rank(morpheme, db, segm, word_freq, family):
+def get_percentage_family_more_frequent(word_freq, family):
+    """
+    Given a word frequency and the frequencies of its morphological family 
+    (with respect to one of its morphemes), returns the percentage of other words in family
+    that have frequency higher than word_freq. 
+    For example, in a family of 3:
+    most frequent has PFMF = 0
+    second most frequent has PFMF = 50
+    least frequent has PFMF = 100
+
+    """
+    if len(family) == 1:
+        return 0
+    fam_more_freq = sum([1 for x in family_values() if x > word_freq])
+    return (fam_more_freq / len(family)-1) * 100
+
+
+def get_family_frequency_rank(word_freq, family):
     """
     Given a word and one of its morphemes, return the frequency ranking of this word in db
     compared to other words containing the morpheme. For example, the most frequent word
     containing '-able' has a FFR of 1 with respect to '-able'.
     """
-    ffr = sum([1 for x in family.values() if x > word_freq]) + 1
-    if morpheme == '(algorithm)':
-        print(word_freq)
-        print(family)
-        print(ffr)
-    return ffr
+    return sum([1 for x in family.values() if x > word_freq]) + 1
 
 
 def merge_new_data_with_database(prs_data, main_db):
@@ -312,16 +325,16 @@ if __name__ == '__main__':
     with open(DB_PATH) as database:
         db = [x for x in list(csv.reader(database))[2:] if x]  # skip headers (2 rows)
 
-    # print('preprocessing db')
-    # db = preprocess_db(db)
-    # print('getting hapax set')
-    # hapax_set = get_hapax_set(db)
-    # print('computing morphological variables')
-    # morpho_vars = compute_morphological_variables(db, hapax_set)
-    # with open('morpho_vars.json', 'w') as f:
-    #     json.dump(morpho_vars, f)
-    with open('morpho_vars.json') as f:
-        morpho_vars = json.load(f)
+    print('preprocessing db')
+    db = preprocess_db(db)
+    print('getting hapax set')
+    hapax_set = get_hapax_set(db)
+    print('computing morphological variables')
+    morpho_vars = compute_morphological_variables(db, hapax_set)
+    with open('morpho_vars.json', 'w') as f:
+        json.dump(morpho_vars, f)
+    # with open('morpho_vars.json') as f:
+    #     morpho_vars = json.load(f)
     print('applying morphological variables to database')
     new_data_by_prs = apply_morpho_vars_to_lex_db(db, morpho_vars)
 
@@ -335,12 +348,12 @@ if __name__ == '__main__':
     # merged_data = merge_new_data_with_database(new_data_by_prs, main_db)
 
     # create output directory if it doesn't exist already
-    os.makedirs('output_1', exist_ok=True)
+    os.makedirs('output', exist_ok=True)
     headers = ['ELP_ItemID', 'Word', 'POS', 'Nmorph', 'PRS_signature', 
                'MorphoLexSegm']
     for prs, data in new_data_by_prs.items():
         prs_str = re.sub(r'[,()]', '', str(prs))
-        savepath = os.path.join(PROJECT_PATH, 'output_1/%s.csv' % prs_str)
+        savepath = os.path.join(PROJECT_PATH, 'output/%s.csv' % prs_str)
         with open(savepath, 'w') as f:
             csvwriter = csv.writer(f)
             csvwriter.writerow(headers + generate_headers(prs))
