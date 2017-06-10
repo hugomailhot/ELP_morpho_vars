@@ -81,7 +81,8 @@ def apply_morpho_vars_to_lex_db(db, morpho_vars):
                       morpho_vars[m]['family_size'],
                       morpho_vars[m]['hal_freq'],
                       morpho_vars[m]['hal_p'],
-                      morpho_vars[m]['hal_p*']]
+                      morpho_vars[m]['hal_p*'],
+                      morpho_vars[m]['length']]
             temp.extend(m_vars)
         res[prs].append(temp)
 
@@ -97,6 +98,7 @@ def compute_morphological_variables(db, hapax_set):
     - summed token frequency
     - p-measure
     - p*-measure
+    - length
     """
     morpho_vars = {}
     counted = set()
@@ -112,6 +114,7 @@ def compute_morphological_variables(db, hapax_set):
             morpho_vars[m] = {'hal_freq': freq}
             morpho_vars[m]['family'] = family
             morpho_vars[m]['family_size'] = len(family)
+            morpho_vars[m]['length'] = len(m) - 2  # -2 because every morpheme is surrounded by brackets
             
             hapax_freq = total_morpheme_freq(m, hapax_set)
             if hapax_freq == 0:
@@ -135,17 +138,17 @@ def generate_headers(prs):
     for i in range(1, p+1):
         headers.extend(['PREF%d_FFR' % i, 'PREF%d_PFMF' % i, 
                         'PREF%d_FamSize' % i, 'PREF%d_Freq_HAL' % i, 
-                        'PREF%d_P' % i, 'PREF%d_P*' % i
+                        'PREF%d_P' % i, 'PREF%d_P*' % i, 'PREF%d_length' % i
                         ])
     for i in range(1, r+1):
         headers.extend(['ROOT%d_FFR' % i, 'ROOT%d_PFMF' % i,
                         'ROOT%d_FamSize' % i, 'ROOT%d_Freq_HAL' % i, 
-                        'ROOT%d_P' % i, 'ROOT%d_P*' % i
+                        'ROOT%d_P' % i, 'ROOT%d_P*' % i, 'ROOT%d_length' % i
                         ])
     for i in range(1, s+1):
         headers.extend(['SUFF%d_FFR' % i, 'SUFF%d_PFMF' % i,
                         'SUFF%d_FamSize' % i, 'SUFF%d_Freq_HAL' % i, 
-                        'SUFF%d_P' % i, 'SUFF%d_P*' % i
+                        'SUFF%d_P' % i, 'SUFF%d_P*' % i, 'SUFF%d_length' % i
                        ])
     return headers
 
@@ -221,8 +224,8 @@ def get_percentage_family_more_frequent(word_freq, family):
     """
     if len(family) == 1:
         return 0
-    fam_more_freq = sum([1 for x in family_values() if x > word_freq])
-    return (fam_more_freq / len(family)-1) * 100
+    fam_more_freq = sum([1 for x in family.values() if x > word_freq])
+    return (fam_more_freq / (len(family)-1)) * 100
 
 
 def get_family_frequency_rank(word_freq, family):
@@ -306,9 +309,10 @@ def save_morpho_vars_to_file(morpho_vars, filepath):
 
     with open(filepath, 'w') as csvfile:
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(['Morpheme', 'Family size', 'Frequency', 'P', 'P*'])
+        csvwriter.writerow(['Morpheme', 'Length', 'Family size', 'Frequency', 'P', 'P*'])
         for morpheme, d in ordered_mfreqs.items():
             csvwriter.writerow([morpheme,
+                                d['length'],
                                 d['family_size'],
                                 d['freq'],
                                 d['p'],
